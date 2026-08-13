@@ -27,6 +27,10 @@ const progressBar = document.querySelector(".scroll-progress span");
 const cursorDot = document.querySelector(".cursor-dot");
 const cursorRing = document.querySelector(".cursor-ring");
 const pageTransition = document.querySelector(".page-transition");
+const finalCta = document.querySelector(".final-cta");
+const finalCore = document.querySelector(".final-core");
+const finalOrbitOne = document.querySelector(".orbit-one");
+const finalOrbitTwo = document.querySelector(".orbit-two");
 
 /* ---------- Page entrance ---------- */
 window.addEventListener("load", () => {
@@ -295,6 +299,81 @@ if (!reduceMotion && window.tsParticles) {
         }
       },
       detectRetina:true
+    }
+  });
+}
+
+/* ---------- Final cinematic frame ---------- */
+if (!reduceMotion && finalCta) {
+  gsap.fromTo(finalCta.querySelector(".final-grid"),
+    {opacity:0},
+    {opacity:.28,duration:1.2,
+      scrollTrigger:{trigger:finalCta,start:"top 82%",once:true}}
+  );
+
+  gsap.fromTo(finalCta.querySelector(".final-eyebrow"),
+    {y:24,opacity:0},
+    {y:0,opacity:1,duration:.8,ease:"power3.out",
+      scrollTrigger:{trigger:finalCta,start:"top 72%",once:true}}
+  );
+
+  gsap.fromTo(finalCta.querySelector(".final-title"),
+    {y:85,opacity:0,scale:.97},
+    {y:0,opacity:1,scale:1,duration:1.25,ease:"power4.out",
+      scrollTrigger:{trigger:finalCta,start:"top 68%",once:true}}
+  );
+
+  gsap.fromTo(finalCta.querySelector(".final-lede"),
+    {y:24,opacity:0},
+    {y:0,opacity:1,duration:.8,delay:.12,ease:"power3.out",
+      scrollTrigger:{trigger:finalCta,start:"top 62%",once:true}}
+  );
+
+  gsap.fromTo(finalCta.querySelector(".final-inner .button"),
+    {y:22,opacity:0,scale:.96},
+    {y:0,opacity:1,scale:1,duration:.8,delay:.18,ease:"power3.out",
+      scrollTrigger:{trigger:finalCta,start:"top 58%",once:true}}
+  );
+
+  gsap.fromTo(finalCta.querySelector(".cta-meta"),
+    {y:16,opacity:0},
+    {y:0,opacity:1,duration:.7,delay:.26,ease:"power3.out",
+      scrollTrigger:{trigger:finalCta,start:"top 54%",once:true}}
+  );
+
+  gsap.to(finalCore,{
+    scale:1.15,
+    opacity:.72,
+    ease:"none",
+    scrollTrigger:{
+      trigger:finalCta,
+      start:"top bottom",
+      end:"bottom top",
+      scrub:1
+    }
+  });
+
+  gsap.to(finalOrbitOne,{
+    rotation:6,
+    x:"2%",
+    ease:"none",
+    scrollTrigger:{
+      trigger:finalCta,
+      start:"top bottom",
+      end:"bottom top",
+      scrub:1.2
+    }
+  });
+
+  gsap.to(finalOrbitTwo,{
+    rotation:-4,
+    x:"-2%",
+    ease:"none",
+    scrollTrigger:{
+      trigger:finalCta,
+      start:"top bottom",
+      end:"bottom top",
+      scrub:1.4
     }
   });
 }

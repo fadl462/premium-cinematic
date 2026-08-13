@@ -1,27 +1,22 @@
-# TIDEFRAME — Premium Cinematic Marketing Technology V3
+# TIDEFRAME — Premium Cinematic Marketing Technology V3.1
 
-High-end cinematic static website built with:
-- Vanilla HTML/CSS/JavaScript
-- GSAP + ScrollTrigger
-- Lenis smooth scrolling
-- tsParticles
-- Lazy/controlled video playback
+Complete replacement files for the V3.1 cinematic refinement.
 
-V3 visual system:
-- Premium cinematic typography and staged reveals
-- Scroll progress indicator
-- Custom desktop cursor
-- Magnetic CTAs
-- Film-grain overlay
-- Ambient scene lighting
-- Deeper camera/parallax motion
-- Refined section pinning
-- Functional mobile navigation
-- Robust stat counters
-- Reduced-motion fallback
-- SEO metadata and canonical URL
+V3.1 focus:
+- Rebuilt final CTA as a deliberate cinematic closing frame
+- Removed the excessive empty/dead CTA area
+- Added restrained orbit/grid ambient graphics
+- Improved CTA hierarchy and reveal choreography
+- Cleaner CTA-to-footer transition
+- Improved supporting-copy readability
+- Preserved TIDEFRAME branding and asset filenames
+- Preserved controlled video playback, Lenis, GSAP and particles
+- Mobile-specific final CTA composition
 
-Temporary media remains in `assets/` and can be replaced later without changing filenames.
+Replace the complete:
+- index.html
+- styles.css
+- script.js
+- README.md
 
-IMPORTANT:
-This is a fictional/demo brand name for the build. Before using the name commercially, perform formal company-name, domain and trademark clearance.
+Keep the existing assets/ folder unchanged.

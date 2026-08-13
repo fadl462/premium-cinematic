@@ -18,6 +18,10 @@ if (lenis) {
 
 const navWrap = document.querySelector(".nav-wrap");
 const sections = [...document.querySelectorAll(".cinematic")];
+const mobileMenu = document.querySelector(".mobile-menu");
+const menuButton = document.querySelector(".menu-btn");
+const menuClose = document.querySelector(".mobile-menu-close");
+const menuLinks = [...document.querySelectorAll(".mobile-menu-links a")];
 
 ScrollTrigger.create({
   start: 80,
@@ -31,7 +35,10 @@ function getVideo(section) {
 
 function loadVideo(section, play = true) {
   const video = getVideo(section);
-  if (!video || reduceMotion || video.dataset.loaded) return;
+  if (!video || reduceMotion || video.dataset.loaded) {
+    if (video && play && !reduceMotion) video.play().catch(() => {});
+    return;
+  }
 
   video.src = section.dataset.video;
   video.dataset.loaded = "true";
@@ -46,30 +53,59 @@ function loadVideo(section, play = true) {
 
 function pauseVideo(section) {
   const video = getVideo(section);
-  if (video && !video.paused) video.pause();
+  if (video && !video.paused) {
+    video.pause();
+  }
 }
 
-/* Hero starts immediately; later videos load just before entering view. */
-if (!reduceMotion) loadVideo(document.querySelector("#hero"), true);
+function activateVideo(section) {
+  if (reduceMotion) return;
 
-sections.forEach(section => {
-  const video = getVideo(section);
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        loadVideo(section, true);
-        if (video) video.play().catch(()=>{});
-      } else if (entry.intersectionRatio === 0) {
-        pauseVideo(section);
-      }
-    });
-  }, {
-    rootMargin: "300px 0px 300px 0px",
-    threshold: [0,.05,.25]
+  sections.forEach(other => {
+    if (other !== section) pauseVideo(other);
   });
 
-  observer.observe(section);
+  loadVideo(section, true);
+}
+
+function getPoster(section) {
+  return section?.dataset.poster || "";
+}
+
+/* Hero starts immediately; later videos load shortly before entering view. */
+if (!reduceMotion) {
+  const hero = document.querySelector("#hero");
+  loadVideo(hero, true);
+}
+
+/*
+  Only the section closest to the viewport center is allowed to play.
+  This prevents multiple MP4s from decoding simultaneously during fast scrolls.
+*/
+const mediaObserver = new IntersectionObserver(entries => {
+  const candidates = entries
+    .filter(entry => entry.isIntersecting)
+    .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+  if (candidates.length) {
+    const strongest = candidates[0];
+    if (strongest.intersectionRatio > 0.08) {
+      activateVideo(strongest.target);
+    }
+  }
+
+  entries.forEach(entry => {
+    if (!entry.isIntersecting && entry.intersectionRatio === 0) {
+      pauseVideo(entry.target);
+    }
+  });
+}, {
+  rootMargin: "220px 0px 220px 0px",
+  threshold: [0, .08, .2, .5, .8]
+});
+
+sections.forEach(section => {
+  mediaObserver.observe(section);
 
   if (!reduceMotion && section.classList.contains("pinned-section")) {
     ScrollTrigger.create({
@@ -86,7 +122,8 @@ sections.forEach(section => {
     ".eyebrow, h2, .copy-block > p:last-child, .actions, .section-index, .stats .stat"
   );
 
-  gsap.fromTo(reveals,
+  gsap.fromTo(
+    reveals,
     {y:44, opacity:0},
     {
       y:0,
@@ -94,24 +131,32 @@ sections.forEach(section => {
       duration:.9,
       stagger:.07,
       ease:"power3.out",
-      scrollTrigger:{trigger:section,start:"top 64%",once:true}
+      scrollTrigger:{
+        trigger:section,
+        start:"top 64%",
+        once:true
+      }
     }
   );
 
   if (!reduceMotion) {
-    gsap.to(section.querySelector(".media"), {
-      scale:isMobile ? 1.025 : 1.055,
-      ease:"none",
-      scrollTrigger:{
-        trigger:section,
-        start:"top bottom",
-        end:"bottom top",
-        scrub:.6
-      }
-    });
+    const media = section.querySelector(".media");
+    if (media) {
+      gsap.to(media, {
+        scale:isMobile ? 1.025 : 1.055,
+        ease:"none",
+        scrollTrigger:{
+          trigger:section,
+          start:"top bottom",
+          end:"bottom top",
+          scrub:.6
+        }
+      });
+    }
   }
 });
 
+/* Stats: meaningful HTML values remain visible even if animation is unavailable. */
 document.querySelectorAll("[data-count]").forEach(el => {
   const target = parseFloat(el.dataset.count);
   const decimals = String(target).includes(".") ? 1 : 0;
@@ -128,11 +173,21 @@ document.querySelectorAll("[data-count]").forEach(el => {
     value:target,
     duration:1.5,
     ease:"power2.out",
-    scrollTrigger:{trigger:el,start:"top 78%",once:true},
-    onUpdate:()=>el.textContent=obj.value.toFixed(decimals)
+    scrollTrigger:{
+      trigger:el,
+      start:"top 78%",
+      once:true
+    },
+    onUpdate:() => {
+      el.textContent = obj.value.toFixed(decimals);
+    },
+    onComplete:() => {
+      el.textContent = target.toFixed(decimals);
+    }
   });
 });
 
+/* Lightweight interactive particles; deliberately reduced on phones. */
 if (!reduceMotion && window.tsParticles) {
   tsParticles.load({
     id:"particles",
@@ -140,25 +195,62 @@ if (!reduceMotion && window.tsParticles) {
       fullScreen:{enable:false},
       fpsLimit:45,
       particles:{
-        number:{value:isMobile?24:42,density:{enable:true,area:1100}},
+        number:{
+          value:isMobile ? 20 : 42,
+          density:{enable:true,area:1100}
+        },
         color:{value:"#ffffff"},
-        opacity:{value:isMobile?.12:.18},
+        opacity:{value:isMobile ? .11 : .18},
         size:{value:{min:.5,max:1.5}},
-        links:{enable:!isMobile,distance:125,color:"#ffffff",opacity:.07,width:.5},
-        move:{enable:true,speed:.28,outModes:{default:"bounce"}}
+        links:{
+          enable:!isMobile,
+          distance:125,
+          color:"#ffffff",
+          opacity:.07,
+          width:.5
+        },
+        move:{
+          enable:true,
+          speed:.28,
+          outModes:{default:"bounce"}
+        }
       },
       interactivity:{
         detectsOn:"window",
-        events:{onHover:{enable:!isMobile,mode:"repulse"},resize:true},
-        modes:{repulse:{distance:120,duration:.45}}
+        events:{
+          onHover:{enable:!isMobile,mode:"repulse"},
+          resize:true
+        },
+        modes:{
+          repulse:{distance:120,duration:.45}
+        }
       },
       detectRetina:true
     }
   });
 }
 
-document.querySelector(".menu-btn")?.addEventListener("click", () => {
-  document.body.classList.toggle("menu-open");
+/* Mobile navigation drawer. */
+function openMenu() {
+  if (!mobileMenu) return;
+  mobileMenu.classList.add("open");
+  mobileMenu.setAttribute("aria-hidden","false");
+  document.body.classList.add("menu-open");
+}
+
+function closeMenu() {
+  if (!mobileMenu) return;
+  mobileMenu.classList.remove("open");
+  mobileMenu.setAttribute("aria-hidden","true");
+  document.body.classList.remove("menu-open");
+}
+
+menuButton?.addEventListener("click", openMenu);
+menuClose?.addEventListener("click", closeMenu);
+menuLinks.forEach(link => link.addEventListener("click", closeMenu));
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeMenu();
 });
 
 window.addEventListener("load", () => {
@@ -167,3 +259,25 @@ window.addEventListener("load", () => {
 });
 
 window.addEventListener("resize", () => ScrollTrigger.refresh());
+
+/* Keep anchor navigation compatible with Lenis. */
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener("click", event => {
+    const id = link.getAttribute("href");
+    if (!id || id === "#") return;
+
+    const target = document.querySelector(id);
+    if (!target) return;
+
+    event.preventDefault();
+    closeMenu();
+
+    if (lenis) {
+      lenis.scrollTo(target, {offset:-12, duration:1.1});
+    } else {
+      target.scrollIntoView({behavior:reduceMotion ? "auto" : "smooth"});
+    }
+
+    history.replaceState(null, "", id);
+  });
+});

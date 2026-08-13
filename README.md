@@ -1,16 +1,17 @@
-# TIDEFRAME — Premium Cinematic Marketing Technology V3.2
+# TIDEFRAME — Premium Cinematic Marketing Technology V3.3
 
-Complete replacement files.
+Complete replacement files for the final cinematic transition refinement.
 
-V3.2 is a final-frame composition pass based on the live-page review:
-- Removes excessive dead space before the final CTA
-- Makes the closing CTA shorter and more editorial
-- Brings the final message into the visual field earlier
-- Keeps the ambient orbit/glow system subtle
-- Creates a cleaner CTA-to-footer transition
-- Preserves TIDEFRAME branding
-- Preserves all asset filenames and existing video architecture
-- Preserves mobile and reduced-motion behaviour
+V3.3 replaces the empty black area before THE NEXT MOVE with a deliberate cinematic signal bridge:
+- Ambient signal tunnel / orbital lines
+- Subtle cyan-white energy field
+- Film-grain texture
+- Kinetic ATTENTION / MOMENTUM markers
+- Scroll-reactive depth
+- Compact final CTA immediately after the bridge
+- Cleaner CTA-to-footer transition
+- Correct TIDEFRAME author metadata
+- Existing asset filenames and video architecture preserved
 
 Replace:
 - index.html

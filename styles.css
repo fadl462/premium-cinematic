@@ -737,3 +737,201 @@ a,button{cursor:none}
     min-height:0;
   }
 }
+
+
+/* =========================================================
+   TIDEFRAME V3.3 — CINEMATIC SIGNAL BRIDGE
+   Replaces the dead black transition before THE NEXT MOVE.
+   ========================================================= */
+
+.closing{
+  position:relative;
+  background:#070707;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+.signal-bridge{
+  position:relative;
+  height:46svh;
+  min-height:360px;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(ellipse at 50% 58%,rgba(142,232,225,.10),transparent 23%),
+    radial-gradient(ellipse at 50% 55%,rgba(255,255,255,.055),transparent 42%),
+    linear-gradient(180deg,#090a0a 0%,#0b0e0e 48%,#070707 100%);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.signal-bridge:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,transparent 0%,rgba(255,255,255,.035) 50%,transparent 100%),
+    repeating-linear-gradient(90deg,transparent 0,transparent 11vw,rgba(255,255,255,.018) 11.05vw,transparent 11.1vw);
+  opacity:.55;
+}
+
+.signal-noise{
+  position:absolute;
+  inset:-20%;
+  opacity:.07;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:signalNoise .2s steps(2) infinite;
+  pointer-events:none;
+}
+
+@keyframes signalNoise{
+  0%{transform:translate(0,0)}
+  25%{transform:translate(1%,-1%)}
+  50%{transform:translate(-1%,1%)}
+  75%{transform:translate(1%,1%)}
+  100%{transform:translate(-1%,-1%)}
+}
+
+.signal-lines{
+  position:absolute;
+  width:min(90vw,1100px);
+  height:75%;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  perspective:700px;
+}
+
+.signal-lines span{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:96%;
+  height:40%;
+  border:1px solid rgba(142,232,225,.10);
+  border-radius:50%;
+  transform:translate(-50%,-50%) rotateX(68deg) scaleX(.9);
+  box-shadow:0 0 35px rgba(142,232,225,.025);
+}
+
+.signal-lines span:nth-child(1){width:28%;height:18%;opacity:.9}
+.signal-lines span:nth-child(2){width:45%;height:26%;opacity:.75}
+.signal-lines span:nth-child(3){width:63%;height:34%;opacity:.58}
+.signal-lines span:nth-child(4){width:81%;height:42%;opacity:.42}
+.signal-lines span:nth-child(5){width:100%;height:50%;opacity:.26}
+
+.signal-orb{
+  position:absolute;
+  width:130px;
+  height:130px;
+  border-radius:50%;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(142,232,225,.25),rgba(142,232,225,.05) 35%,transparent 70%);
+  filter:blur(7px);
+  box-shadow:0 0 80px rgba(142,232,225,.08);
+}
+
+.bridge-word{
+  position:absolute;
+  font:500 9px "DM Mono",monospace;
+  letter-spacing:.22em;
+  color:rgba(255,255,255,.34);
+  z-index:4;
+}
+
+.bridge-word-a{
+  left:7vw;
+  top:18%;
+}
+.bridge-word-b{
+  right:7vw;
+  bottom:18%;
+}
+
+.final-cta{
+  min-height:64svh;
+  padding:9vh 8vw 10vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  overflow:hidden;
+  position:relative;
+  background:
+    radial-gradient(circle at 50% 45%,rgba(142,232,225,.045),transparent 32%),
+    #070707;
+}
+
+.final-cta h2{
+  position:relative;
+  z-index:2;
+  font-size:clamp(54px,8vw,122px);
+  line-height:.86;
+  letter-spacing:-.075em;
+  margin:20px 0 24px;
+}
+
+.final-cta .eyebrow,
+.final-cta .final-lede,
+.final-cta .button,
+.final-cta .cta-meta{
+  position:relative;
+  z-index:3;
+}
+
+.final-lede{
+  max-width:420px;
+  margin:0 0 26px;
+  color:rgba(255,255,255,.55);
+  font-size:13px;
+  line-height:1.6;
+}
+
+.final-cta .cta-glow{
+  width:42vw;
+  height:42vw;
+  opacity:.62;
+}
+
+@media(max-width:800px){
+  .signal-bridge{
+    height:38svh;
+    min-height:280px;
+  }
+
+  .bridge-word{
+    font-size:8px;
+    letter-spacing:.16em;
+  }
+
+  .signal-lines{
+    width:125vw;
+  }
+
+  .signal-orb{
+    width:90px;
+    height:90px;
+  }
+
+  .final-cta{
+    min-height:62svh;
+    padding:10vh 7vw 9vh;
+  }
+
+  .final-cta h2{
+    font-size:clamp(50px,13vw,78px);
+  }
+
+  .final-cta .cta-glow{
+    width:70vw;
+    height:70vw;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .signal-noise{animation:none}
+}

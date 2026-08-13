@@ -378,6 +378,50 @@ if (!reduceMotion && finalCta) {
   });
 }
 
+
+/* ---------- Cinematic signal bridge ---------- */
+const signalBridge = document.querySelector(".signal-bridge");
+const signalOrb = document.querySelector(".signal-orb");
+const signalLines = document.querySelectorAll(".signal-lines span");
+
+if (!reduceMotion && signalBridge) {
+  gsap.fromTo(signalOrb,
+    {scale:.7, opacity:.15},
+    {scale:1.25, opacity:.9, ease:"none",
+      scrollTrigger:{
+        trigger:signalBridge,
+        start:"top bottom",
+        end:"bottom top",
+        scrub:1
+      }}
+  );
+
+  signalLines.forEach((line,index)=>{
+    gsap.fromTo(line,
+      {scale:.72, opacity:0},
+      {scale:1, opacity:Math.max(.2,.72-index*.11), ease:"none",
+        scrollTrigger:{
+          trigger:signalBridge,
+          start:"top 90%",
+          end:"center center",
+          scrub:.8
+        }}
+    );
+  });
+
+  gsap.fromTo(signalBridge.querySelector(".bridge-word-a"),
+    {x:-35,opacity:0},
+    {x:0,opacity:.34,duration:1,ease:"power3.out",
+      scrollTrigger:{trigger:signalBridge,start:"top 78%",once:true}}
+  );
+
+  gsap.fromTo(signalBridge.querySelector(".bridge-word-b"),
+    {x:35,opacity:0},
+    {x:0,opacity:.34,duration:1,delay:.08,ease:"power3.out",
+      scrollTrigger:{trigger:signalBridge,start:"top 72%",once:true}}
+  );
+}
+
 /* ---------- Mobile menu ---------- */
 function openMenu(){
   if (!mobileMenu) return;

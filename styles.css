@@ -632,3 +632,108 @@ a,button{cursor:none}
 @media(prefers-reduced-motion:reduce){
   .final-orbit,.final-core{animation:none}
 }
+
+
+/* =========================================================
+   TIDEFRAME V3.2 — FINAL FRAME COMPOSITION
+   The ending is intentionally compact: no long dead zone.
+   ========================================================= */
+
+.final-cta{
+  min-height:72svh;
+  height:auto;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(142,232,225,.045),transparent 34%),
+    #070707;
+}
+
+.final-inner{
+  width:min(1080px,84vw);
+  padding:12vh 0 10vh;
+}
+
+.final-eyebrow{
+  margin-bottom:20px;
+}
+
+.final-title{
+  font-size:clamp(58px,8.2vw,124px);
+  line-height:.86;
+}
+
+.final-lede{
+  margin:26px 0 24px;
+  font-size:13px;
+}
+
+.final-inner .cta-meta{
+  margin-top:24px;
+}
+
+.final-grid{
+  opacity:.18;
+  background-size:72px 72px;
+  mask-image:linear-gradient(to bottom,transparent,black 18%,black 82%,transparent);
+  -webkit-mask-image:linear-gradient(to bottom,transparent,black 18%,black 82%,transparent);
+}
+
+.final-orbit.orbit-one{
+  width:48vw;
+  height:21vw;
+}
+
+.final-orbit.orbit-two{
+  width:68vw;
+  height:30vw;
+}
+
+.final-core{
+  width:22vw;
+  height:22vw;
+}
+
+.footer{
+  min-height:150px;
+  padding-top:42px;
+  padding-bottom:44px;
+}
+
+@media(max-width:800px){
+  .final-cta{
+    min-height:68svh;
+  }
+
+  .final-inner{
+    width:86vw;
+    padding:10vh 0 9vh;
+  }
+
+  .final-title{
+    font-size:clamp(52px,13vw,78px);
+  }
+
+  .final-lede{
+    margin:22px 0;
+  }
+
+  .final-orbit.orbit-one{
+    width:105vw;
+    height:52vw;
+  }
+
+  .final-orbit.orbit-two{
+    width:135vw;
+    height:64vw;
+  }
+
+  .final-core{
+    width:62vw;
+    height:62vw;
+  }
+
+  .footer{
+    min-height:0;
+  }
+}

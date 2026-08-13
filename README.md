@@ -1,19 +1,18 @@
-# TIDEFRAME — Premium Cinematic Marketing Technology V3.1
+# TIDEFRAME — Premium Cinematic Marketing Technology V3.2
 
-Complete replacement files for the V3.1 cinematic refinement.
+Complete replacement files.
 
-V3.1 focus:
-- Rebuilt final CTA as a deliberate cinematic closing frame
-- Removed the excessive empty/dead CTA area
-- Added restrained orbit/grid ambient graphics
-- Improved CTA hierarchy and reveal choreography
-- Cleaner CTA-to-footer transition
-- Improved supporting-copy readability
-- Preserved TIDEFRAME branding and asset filenames
-- Preserved controlled video playback, Lenis, GSAP and particles
-- Mobile-specific final CTA composition
+V3.2 is a final-frame composition pass based on the live-page review:
+- Removes excessive dead space before the final CTA
+- Makes the closing CTA shorter and more editorial
+- Brings the final message into the visual field earlier
+- Keeps the ambient orbit/glow system subtle
+- Creates a cleaner CTA-to-footer transition
+- Preserves TIDEFRAME branding
+- Preserves all asset filenames and existing video architecture
+- Preserves mobile and reduced-motion behaviour
 
-Replace the complete:
+Replace:
 - index.html
 - styles.css
 - script.js

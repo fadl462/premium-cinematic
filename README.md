@@ -1,21 +1,27 @@
-# Premium Cinematic One-Page Website — V2.1
+# TIDEFRAME — Premium Cinematic Marketing Technology V3
 
-Complete replacement files for the cinematic static site.
+High-end cinematic static website built with:
+- Vanilla HTML/CSS/JavaScript
+- GSAP + ScrollTrigger
+- Lenis smooth scrolling
+- tsParticles
+- Lazy/controlled video playback
 
-V2.1 improvements:
-- Meaningful stat values remain in the HTML as a fallback
-- Only the strongest visible section is allowed to play its video
-- Other section videos pause during navigation
-- Hero still starts immediately
-- Later videos load shortly before entering the viewport
-- Reduced particle workload on mobile
-- Functional mobile navigation drawer
-- Escape-key and link-close behaviour for the mobile drawer
-- Smooth anchor navigation with Lenis
-- Refined glass navigation and micro-interactions
-- Reduced-motion support
+V3 visual system:
+- Premium cinematic typography and staged reveals
+- Scroll progress indicator
+- Custom desktop cursor
+- Magnetic CTAs
+- Film-grain overlay
+- Ambient scene lighting
+- Deeper camera/parallax motion
+- Refined section pinning
+- Functional mobile navigation
+- Robust stat counters
+- Reduced-motion fallback
 - SEO metadata and canonical URL
 
-Replace the existing `index.html`, `styles.css`, and `script.js` with these complete files.
+Temporary media remains in `assets/` and can be replaced later without changing filenames.
 
-Keep the existing `assets/` folder unchanged.
+IMPORTANT:
+This is a fictional/demo brand name for the build. Before using the name commercially, perform formal company-name, domain and trademark clearance.

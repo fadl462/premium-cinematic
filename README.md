@@ -1,29 +1,18 @@
-# Premium Cinematic One-Page Website
+# Premium Cinematic One-Page Website — V2
 
-This is a production-ready static starter matching the supplied brief:
-- Vanilla HTML/CSS/JS
-- GSAP + ScrollTrigger
-- Lenis smooth scrolling
-- tsParticles hero interaction
-- 6 fullscreen video sections
-- Scroll-triggered staggered reveals
-- Animated stat counters
-- Responsive/mobile treatment
-- prefers-reduced-motion fallback
-- SEO/OG metadata
-- No WordPress, React or page builder
+Complete replacement files for the cinematic static site.
 
-## Replace the placeholders
+V2 improvements:
+- Hero video starts immediately
+- Later videos load shortly before entering view
+- Videos pause when completely outside the viewport
+- Lower particle workload on mobile
+- More efficient Lenis/GSAP settings
+- Refined glass navigation and button interactions
+- More robust stat counter fallback
+- Reduced-motion support
+- OG image metadata
 
-Put the supplied client assets in `/assets/` using these filenames:
-- master-01.jpg ... master-06.jpg
-- video-01.mp4 ... video-06.mp4
-- og-image.jpg
+Replace the existing `index.html`, `styles.css`, and `script.js` with these complete files.
 
-Then replace the placeholder copy, brand name, phone number and navigation labels in `index.html`.
-
-For mobile-specific video files, add them and update the JS/CSS strategy as required.
-
-## Hosting
-
-Upload the folder contents to any static host (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3, etc.).
+Keep the existing `assets/` folder unchanged.

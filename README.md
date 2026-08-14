@@ -25,3 +25,7 @@ Replace these complete files:
 Keep the existing `assets/` folder unchanged.
 
 This release is designed to be uploaded as full-file replacements rather than incremental patches.
+
+
+## V3.6
+Final closing transition compressed so the signal bridge no longer creates a large black gap before THE NEXT MOVE.

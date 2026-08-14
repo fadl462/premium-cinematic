@@ -1091,3 +1091,30 @@ a,button{cursor:none}
     padding:26px 7vw 30px;
   }
 }
+
+/* V3.6 — eliminate the remaining dead space before THE NEXT MOVE */
+.signal-bridge{
+  height:6svh;
+  min-height:70px;
+  max-height:100px;
+}
+.signal-bridge .signal-lines{opacity:.72}
+.signal-bridge .signal-orb{
+  width:54px;
+  height:54px;
+  opacity:.55;
+}
+.signal-bridge .bridge-word-a{top:24%}
+.signal-bridge .bridge-word-b{bottom:24%}
+
+@media(max-width:800px){
+  .signal-bridge{
+    height:9svh;
+    min-height:72px;
+    max-height:105px;
+  }
+  .signal-bridge .signal-orb{
+    width:46px;
+    height:46px;
+  }
+}

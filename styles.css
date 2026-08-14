@@ -1118,3 +1118,74 @@ a,button{cursor:none}
     height:46px;
   }
 }
+
+/* =========================================================
+   TIDEFRAME V3.7 — REMOVE CLOSING DEAD ZONE
+   The previous signal bridge is removed from the layout.
+   The transition now flows directly into THE NEXT MOVE.
+   ========================================================= */
+.closing{
+  position:relative;
+}
+
+.closing::before{
+  content:"";
+  display:block;
+  height:1px;
+  width:100%;
+  background:linear-gradient(90deg,transparent,rgba(142,232,225,.24),transparent);
+  box-shadow:0 0 18px rgba(142,232,225,.08);
+}
+
+.signal-bridge{
+  display:none !important;
+  height:0 !important;
+  min-height:0 !important;
+  max-height:0 !important;
+  border:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+.final-cta{
+  min-height:42svh;
+  padding:5vh 8vw 5vh;
+}
+
+.final-cta .final-inner{
+  padding:1vh 0;
+}
+
+.final-cta h2{
+  margin:7px 0 12px;
+}
+
+.final-lede{
+  margin:0 0 16px;
+}
+
+.final-cta .cta-meta{
+  margin-top:14px;
+}
+
+.final-cta .cta-glow{
+  width:30vw;
+  height:30vw;
+  opacity:.36;
+}
+
+@media(max-width:800px){
+  .final-cta{
+    min-height:48svh;
+    padding:5vh 7vw;
+  }
+
+  .final-cta .final-inner{
+    padding:1vh 0;
+  }
+
+  .final-cta .cta-glow{
+    width:58vw;
+    height:58vw;
+  }
+}

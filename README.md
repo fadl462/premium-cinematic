@@ -29,3 +29,6 @@ This release is designed to be uploaded as full-file replacements rather than in
 
 ## V3.6
 Final closing transition compressed so the signal bridge no longer creates a large black gap before THE NEXT MOVE.
+
+## V3.7
+Removed the closing signal bridge entirely. The final CTA now follows the Less noise. More signal. section immediately, with only a one-pixel cinematic divider.

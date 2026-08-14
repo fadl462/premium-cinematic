@@ -935,3 +935,133 @@ a,button{cursor:none}
 @media(prefers-reduced-motion:reduce){
   .signal-noise{animation:none}
 }
+
+
+/* =========================================================
+   TIDEFRAME V3.4 — PERFORMANCE + CLOSING COMPRESSION
+   ========================================================= */
+
+/* Keep the video layer compositor-friendly and completely passive. */
+.bg-video{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:translate3d(0,0,0);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  will-change:transform;
+}
+
+/* The cinematic bridge is now a short signal transition, not a dead zone. */
+.signal-bridge{
+  height:18svh;
+  min-height:150px;
+  max-height:220px;
+}
+
+.signal-bridge:before{
+  opacity:.36;
+}
+
+.signal-noise{
+  opacity:.045;
+}
+
+.signal-lines{
+  height:100%;
+  width:min(72vw,900px);
+}
+
+.signal-orb{
+  width:90px;
+  height:90px;
+  opacity:.7;
+}
+
+.bridge-word-a{top:30%}
+.bridge-word-b{bottom:30%}
+
+/* Compact final CTA: content arrives quickly and the footer follows naturally. */
+.final-cta{
+  min-height:44svh;
+  height:auto;
+  padding:7vh 8vw 7vh;
+}
+
+.final-cta h2{
+  margin:12px 0 18px;
+}
+
+.final-lede{
+  margin:0 0 18px;
+}
+
+.final-cta .cta-meta{
+  margin-top:16px;
+}
+
+.final-cta .cta-glow{
+  width:32vw;
+  height:32vw;
+  opacity:.42;
+}
+
+.footer{
+  min-height:120px;
+  padding-top:34px;
+  padding-bottom:38px;
+}
+
+/* Do not let hover state visually suggest that the video has paused. */
+.cinematic:hover .bg-video{
+  filter:saturate(.72) contrast(1.05);
+}
+
+@media(max-width:800px){
+  .signal-bridge{
+    height:15svh;
+    min-height:120px;
+    max-height:170px;
+  }
+
+  .signal-lines{
+    width:125vw;
+  }
+
+  .signal-orb{
+    width:65px;
+    height:65px;
+  }
+
+  .final-cta{
+    min-height:50svh;
+    padding:7vh 7vw 7vh;
+  }
+
+  .final-cta h2{
+    font-size:clamp(50px,13vw,78px);
+    margin:10px 0 16px;
+  }
+
+  .final-lede{
+    margin-bottom:16px;
+  }
+
+  .final-cta .cta-glow{
+    width:60vw;
+    height:60vw;
+  }
+
+  .footer{
+    min-height:0;
+    padding:32px 7vw 38px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .bg-video{display:none}
+}

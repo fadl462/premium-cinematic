@@ -4,10 +4,10 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match
 const isMobile = window.matchMedia("(max-width: 800px)").matches;
 
 const lenis = reduceMotion ? null : new Lenis({
-  duration: 1.12,
+  duration: 0.92,
   smoothWheel: true,
   smoothTouch: false,
-  wheelMultiplier: 0.88,
+  wheelMultiplier: 0.9,
   syncTouch: false
 });
 
@@ -27,21 +27,15 @@ const progressBar = document.querySelector(".scroll-progress span");
 const cursorDot = document.querySelector(".cursor-dot");
 const cursorRing = document.querySelector(".cursor-ring");
 const pageTransition = document.querySelector(".page-transition");
-const finalCta = document.querySelector(".final-cta");
-const finalCore = document.querySelector(".final-core");
-const finalOrbitOne = document.querySelector(".orbit-one");
-const finalOrbitTwo = document.querySelector(".orbit-two");
 
-/* ---------- Page entrance ---------- */
 window.addEventListener("load", () => {
   requestAnimationFrame(() => pageTransition?.classList.add("hide"));
   document.getElementById("preloader")?.classList.add("hide");
   ScrollTrigger.refresh();
 });
 
-/* ---------- Scroll progress + navigation state ---------- */
 if (lenis) {
-  lenis.on("scroll", ({scroll, limit}) => {
+  lenis.on("scroll", ({ scroll, limit }) => {
     if (progressBar && limit > 0) {
       progressBar.style.width = `${Math.min(100, Math.max(0, scroll / limit * 100))}%`;
     }
@@ -53,24 +47,24 @@ if (lenis) {
     const current = window.scrollY;
     if (progressBar && max > 0) progressBar.style.width = `${current / max * 100}%`;
     navWrap?.classList.toggle("scrolled", current > 80);
-  }, {passive:true});
+  }, { passive: true });
 }
 
-/* ---------- Cursor ---------- */
+/* ---------- Cursor: visual only; never intercepts video interaction ---------- */
 if (!isMobile && !reduceMotion && cursorDot && cursorRing) {
   let mx = innerWidth / 2, my = innerHeight / 2;
   let rx = mx, ry = my;
 
-  window.addEventListener("pointermove", event => {
+  window.addEventListener("pointermove", (event) => {
     mx = event.clientX;
     my = event.clientY;
-    gsap.to(cursorDot, {x:mx, y:my, duration:.08, overwrite:true});
-  }, {passive:true});
+    gsap.to(cursorDot, { x: mx, y: my, duration: .06, overwrite: true });
+  }, { passive: true });
 
   gsap.ticker.add(() => {
-    rx += (mx - rx) * .18;
-    ry += (my - ry) * .18;
-    gsap.set(cursorRing, {x:rx, y:ry});
+    rx += (mx - rx) * .2;
+    ry += (my - ry) * .2;
+    gsap.set(cursorRing, { x: rx, y: ry });
   });
 
   document.querySelectorAll("a,button,.stat,.mobile-menu-links a").forEach(el => {
@@ -79,113 +73,165 @@ if (!isMobile && !reduceMotion && cursorDot && cursorRing) {
   });
 }
 
-/* ---------- Video management ---------- */
+/* ---------- Reliable cinematic video system ---------- */
+const videoSections = sections.filter(section => section.querySelector(".bg-video"));
+let activeSection = null;
+let playToken = 0;
+
 function getVideo(section) {
   return section?.querySelector(".bg-video");
 }
 
-function loadVideo(section, play = true) {
+function prepareVideo(section) {
   const video = getVideo(section);
-  if (!video || reduceMotion) return;
+  if (!video || reduceMotion) return null;
 
   if (!video.dataset.loaded) {
     video.src = section.dataset.video;
     video.dataset.loaded = "true";
+    video.preload = section.id === "hero" ? "auto" : "auto";
     video.load();
   }
-
-  if (play) {
-    const start = () => video.play().catch(() => {});
-    if (video.readyState >= 2) start();
-    else video.addEventListener("canplay", start, {once:true});
-  }
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+  return video;
 }
 
-function pauseVideo(section) {
-  const video = getVideo(section);
-  if (video && !video.paused) video.pause();
+function playVideo(video) {
+  if (!video || reduceMotion) return Promise.resolve();
+
+  video.muted = true;
+  const attempt = video.play();
+  if (attempt && typeof attempt.catch === "function") {
+    return attempt.catch(() => {});
+  }
+  return Promise.resolve();
 }
 
 function activateVideo(section) {
-  if (reduceMotion) return;
-  sections.forEach(other => {
-    if (other !== section) pauseVideo(other);
-  });
-  loadVideo(section, true);
-}
-
-if (!reduceMotion) loadVideo(document.querySelector("#hero"), true);
-
-const mediaObserver = new IntersectionObserver(entries => {
-  const visible = entries
-    .filter(entry => entry.isIntersecting)
-    .sort((a,b) => b.intersectionRatio - a.intersectionRatio);
-
-  if (visible[0] && visible[0].intersectionRatio > .10) {
-    activateVideo(visible[0].target);
+  if (!section || reduceMotion) return;
+  if (activeSection === section) {
+    playVideo(getVideo(section));
+    return;
   }
 
-  entries.forEach(entry => {
-    if (!entry.isIntersecting && entry.intersectionRatio === 0) {
-      pauseVideo(entry.target);
-    }
-  });
+  const video = prepareVideo(section);
+  if (!video) return;
+
+  const token = ++playToken;
+
+  /* Never pause the currently visible video before the incoming one is ready.
+     This prevents the black/stutter gap during section changes. */
+  const startIncoming = () => {
+    if (token !== playToken) return;
+    activeSection = section;
+
+    video.currentTime = video.currentTime || 0;
+    playVideo(video);
+
+    videoSections.forEach(other => {
+      if (other === section) return;
+      const otherVideo = getVideo(other);
+      if (otherVideo && !otherVideo.paused) {
+        otherVideo.pause();
+      }
+    });
+  };
+
+  if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+    startIncoming();
+  } else {
+    video.addEventListener("canplay", startIncoming, { once: true });
+  }
+}
+
+/* Hero is explicitly prepared immediately. The HTML also has autoplay/src,
+   so the browser can start buffering before the JS boot sequence finishes. */
+if (!reduceMotion) {
+  const hero = document.querySelector("#hero");
+  if (hero) activateVideo(hero);
+
+  /* Warm the next scene without playing it. */
+  videoSections.slice(1, 2).forEach(prepareVideo);
+}
+
+/* Switch only when a section is genuinely dominant in the viewport.
+   Do not pause videos on individual intersection exits. */
+const mediaObserver = new IntersectionObserver((entries) => {
+  const candidates = entries
+    .filter(entry => entry.isIntersecting)
+    .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+  const dominant = candidates.find(entry => entry.intersectionRatio >= .48);
+  if (dominant) {
+    activateVideo(dominant.target);
+
+    const index = videoSections.indexOf(dominant.target);
+    const next = videoSections[index + 1];
+    if (next) prepareVideo(next);
+  }
 }, {
-  rootMargin:"240px 0px 240px 0px",
-  threshold:[0,.1,.25,.5,.8]
+  rootMargin: "0px 0px 0px 0px",
+  threshold: [.2, .48, .7]
 });
 
-sections.forEach(section => {
-  mediaObserver.observe(section);
+videoSections.forEach(section => mediaObserver.observe(section));
 
+/* Keep the currently active video playing if the browser suspends playback.
+   This is deliberately NOT tied to hover events. */
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && activeSection) {
+    playVideo(getVideo(activeSection));
+  }
+});
+
+videoSections.forEach(section => {
   const media = section.querySelector(".media");
   const light = section.querySelector(".scene-light");
 
-  /* Cinematic camera drift */
   if (!reduceMotion && media) {
     gsap.fromTo(media,
-      {scale:isMobile ? 1.02 : 1.04},
+      { scale: isMobile ? 1.01 : 1.025 },
       {
-        scale:isMobile ? 1.035 : 1.09,
-        ease:"none",
-        scrollTrigger:{
-          trigger:section,
-          start:"top bottom",
-          end:"bottom top",
-          scrub:.8
+        scale: isMobile ? 1.035 : 1.065,
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: .9
         }
       }
     );
   }
 
   if (!reduceMotion && light) {
-    gsap.to(light,{
-      x:isMobile ? -25 : 80,
-      y:isMobile ? 20 : -40,
-      rotation:18,
-      ease:"none",
-      scrollTrigger:{
-        trigger:section,
-        start:"top bottom",
-        end:"bottom top",
-        scrub:1.2
+    gsap.to(light, {
+      x: isMobile ? -18 : 55,
+      y: isMobile ? 12 : -28,
+      rotation: 12,
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1.2
       }
     });
   }
 
-  /* Section pinning */
   if (!reduceMotion && section.classList.contains("pinned-section")) {
     ScrollTrigger.create({
-      trigger:section,
-      start:"top top",
-      end:"+=22%",
-      pin:true,
-      pinSpacing:false,
-      anticipatePin:1
+      trigger: section,
+      start: "top top",
+      end: "+=16%",
+      pin: true,
+      pinSpacing: false,
+      anticipatePin: 1
     });
   }
 
-  /* Staggered reveal */
   const eyebrow = section.querySelector(".eyebrow");
   const heading = section.querySelector("h2");
   const paragraph = section.querySelector(".copy-block > p:last-child");
@@ -193,43 +239,38 @@ sections.forEach(section => {
   const stats = section.querySelectorAll(".stat");
 
   if (eyebrow) {
-    gsap.fromTo(eyebrow,
-      {y:24,opacity:0},
-      {y:0,opacity:1,duration:.8,ease:"power3.out",
-        scrollTrigger:{trigger:section,start:"top 68%",once:true}}
-    );
+    gsap.fromTo(eyebrow, { y: 20, opacity: 0 }, {
+      y: 0, opacity: 1, duration: .75, ease: "power3.out",
+      scrollTrigger: { trigger: section, start: "top 68%", once: true }
+    });
   }
 
   if (heading) {
-    gsap.fromTo(heading,
-      {y:70,opacity:0,rotateX:8},
-      {y:0,opacity:1,rotateX:0,duration:1.15,ease:"power4.out",
-        scrollTrigger:{trigger:section,start:"top 64%",once:true}}
-    );
+    gsap.fromTo(heading, { y: 55, opacity: 0, rotateX: 5 }, {
+      y: 0, opacity: 1, rotateX: 0, duration: 1.0, ease: "power4.out",
+      scrollTrigger: { trigger: section, start: "top 64%", once: true }
+    });
   }
 
   if (paragraph) {
-    gsap.fromTo(paragraph,
-      {y:28,opacity:0},
-      {y:0,opacity:1,duration:.9,delay:.12,ease:"power3.out",
-        scrollTrigger:{trigger:section,start:"top 60%",once:true}}
-    );
+    gsap.fromTo(paragraph, { y: 22, opacity: 0 }, {
+      y: 0, opacity: 1, duration: .8, delay: .1, ease: "power3.out",
+      scrollTrigger: { trigger: section, start: "top 60%", once: true }
+    });
   }
 
   if (index) {
-    gsap.fromTo(index,
-      {x:-25,opacity:0},
-      {x:0,opacity:1,duration:.8,ease:"power3.out",
-        scrollTrigger:{trigger:section,start:"top 68%",once:true}}
-    );
+    gsap.fromTo(index, { x: -20, opacity: 0 }, {
+      x: 0, opacity: 1, duration: .75, ease: "power3.out",
+      scrollTrigger: { trigger: section, start: "top 68%", once: true }
+    });
   }
 
   if (stats.length) {
-    gsap.fromTo(stats,
-      {y:55,opacity:0},
-      {y:0,opacity:1,duration:.95,stagger:.09,ease:"power3.out",
-        scrollTrigger:{trigger:section,start:"top 58%",once:true}}
-    );
+    gsap.fromTo(stats, { y: 42, opacity: 0 }, {
+      y: 0, opacity: 1, duration: .85, stagger: .08, ease: "power3.out",
+      scrollTrigger: { trigger: section, start: "top 58%", once: true }
+    });
   }
 });
 
@@ -243,239 +284,133 @@ document.querySelectorAll("[data-count]").forEach(el => {
     return;
   }
 
-  const obj = {value:0};
+  const obj = { value: 0 };
   el.textContent = "0";
 
-  gsap.to(obj,{
-    value:target,
-    duration:1.7,
-    ease:"power3.out",
-    scrollTrigger:{
-      trigger:el,
-      start:"top 78%",
-      once:true
-    },
-    onUpdate:()=>el.textContent=obj.value.toFixed(decimals),
-    onComplete:()=>el.textContent=target.toFixed(decimals)
+  gsap.to(obj, {
+    value: target,
+    duration: 1.5,
+    ease: "power3.out",
+    scrollTrigger: { trigger: el, start: "top 78%", once: true },
+    onUpdate: () => el.textContent = obj.value.toFixed(decimals),
+    onComplete: () => el.textContent = target.toFixed(decimals)
   });
 });
 
-/* ---------- Particle field ---------- */
+/* ---------- Hero particle field: intentionally lightweight and no hover repulse ---------- */
 if (!reduceMotion && window.tsParticles) {
   tsParticles.load({
-    id:"particles",
-    options:{
-      fullScreen:{enable:false},
-      fpsLimit:40,
-      particles:{
-        number:{
-          value:isMobile ? 16 : 36,
-          density:{enable:true,area:1200}
+    id: "particles",
+    options: {
+      fullScreen: { enable: false },
+      fpsLimit: isMobile ? 24 : 30,
+      particles: {
+        number: {
+          value: isMobile ? 10 : 24,
+          density: { enable: true, area: 1500 }
         },
-        color:{value:"#ffffff"},
-        opacity:{value:isMobile ? .09 : .14},
-        size:{value:{min:.4,max:1.4}},
-        links:{
-          enable:!isMobile,
-          distance:135,
-          color:"#ffffff",
-          opacity:.055,
-          width:.45
+        color: { value: "#ffffff" },
+        opacity: { value: isMobile ? .07 : .11 },
+        size: { value: { min: .35, max: 1.1 } },
+        links: {
+          enable: !isMobile,
+          distance: 145,
+          color: "#8ee8e1",
+          opacity: .035,
+          width: .4
         },
-        move:{
-          enable:true,
-          speed:.22,
-          outModes:{default:"bounce"}
+        move: {
+          enable: true,
+          speed: .12,
+          outModes: { default: "bounce" }
         }
       },
-      interactivity:{
-        detectsOn:"window",
-        events:{
-          onHover:{enable:!isMobile,mode:"repulse"},
-          resize:true
-        },
-        modes:{
-          repulse:{distance:110,duration:.55}
+      interactivity: {
+        detectsOn: "window",
+        events: {
+          onHover: { enable: false },
+          resize: true
         }
       },
-      detectRetina:true
+      detectRetina: false
     }
   });
 }
 
-/* ---------- Final cinematic frame ---------- */
-if (!reduceMotion && finalCta) {
-  gsap.fromTo(finalCta.querySelector(".final-grid"),
-    {opacity:0},
-    {opacity:.28,duration:1.2,
-      scrollTrigger:{trigger:finalCta,start:"top 82%",once:true}}
-  );
-
-  gsap.fromTo(finalCta.querySelector(".final-eyebrow"),
-    {y:24,opacity:0},
-    {y:0,opacity:1,duration:.8,ease:"power3.out",
-      scrollTrigger:{trigger:finalCta,start:"top 72%",once:true}}
-  );
-
-  gsap.fromTo(finalCta.querySelector(".final-title"),
-    {y:85,opacity:0,scale:.97},
-    {y:0,opacity:1,scale:1,duration:1.25,ease:"power4.out",
-      scrollTrigger:{trigger:finalCta,start:"top 68%",once:true}}
-  );
-
-  gsap.fromTo(finalCta.querySelector(".final-lede"),
-    {y:24,opacity:0},
-    {y:0,opacity:1,duration:.8,delay:.12,ease:"power3.out",
-      scrollTrigger:{trigger:finalCta,start:"top 62%",once:true}}
-  );
-
-  gsap.fromTo(finalCta.querySelector(".final-inner .button"),
-    {y:22,opacity:0,scale:.96},
-    {y:0,opacity:1,scale:1,duration:.8,delay:.18,ease:"power3.out",
-      scrollTrigger:{trigger:finalCta,start:"top 58%",once:true}}
-  );
-
-  gsap.fromTo(finalCta.querySelector(".cta-meta"),
-    {y:16,opacity:0},
-    {y:0,opacity:1,duration:.7,delay:.26,ease:"power3.out",
-      scrollTrigger:{trigger:finalCta,start:"top 54%",once:true}}
-  );
-
-  gsap.to(finalCore,{
-    scale:1.15,
-    opacity:.72,
-    ease:"none",
-    scrollTrigger:{
-      trigger:finalCta,
-      start:"top bottom",
-      end:"bottom top",
-      scrub:1
-    }
-  });
-
-  gsap.to(finalOrbitOne,{
-    rotation:6,
-    x:"2%",
-    ease:"none",
-    scrollTrigger:{
-      trigger:finalCta,
-      start:"top bottom",
-      end:"bottom top",
-      scrub:1.2
-    }
-  });
-
-  gsap.to(finalOrbitTwo,{
-    rotation:-4,
-    x:"-2%",
-    ease:"none",
-    scrollTrigger:{
-      trigger:finalCta,
-      start:"top bottom",
-      end:"bottom top",
-      scrub:1.4
-    }
-  });
-}
-
-
-/* ---------- Cinematic signal bridge ---------- */
+/* ---------- Signal bridge: compact, purposeful transition ---------- */
 const signalBridge = document.querySelector(".signal-bridge");
 const signalOrb = document.querySelector(".signal-orb");
 const signalLines = document.querySelectorAll(".signal-lines span");
 
 if (!reduceMotion && signalBridge) {
-  gsap.fromTo(signalOrb,
-    {scale:.7, opacity:.15},
-    {scale:1.25, opacity:.9, ease:"none",
-      scrollTrigger:{
-        trigger:signalBridge,
-        start:"top bottom",
-        end:"bottom top",
-        scrub:1
-      }}
-  );
-
-  signalLines.forEach((line,index)=>{
-    gsap.fromTo(line,
-      {scale:.72, opacity:0},
-      {scale:1, opacity:Math.max(.2,.72-index*.11), ease:"none",
-        scrollTrigger:{
-          trigger:signalBridge,
-          start:"top 90%",
-          end:"center center",
-          scrub:.8
-        }}
-    );
+  gsap.fromTo(signalOrb, { scale: .82, opacity: .12 }, {
+    scale: 1.12, opacity: .65, ease: "none",
+    scrollTrigger: { trigger: signalBridge, start: "top bottom", end: "bottom top", scrub: 1 }
   });
 
-  gsap.fromTo(signalBridge.querySelector(".bridge-word-a"),
-    {x:-35,opacity:0},
-    {x:0,opacity:.34,duration:1,ease:"power3.out",
-      scrollTrigger:{trigger:signalBridge,start:"top 78%",once:true}}
-  );
+  signalLines.forEach((line, index) => {
+    gsap.fromTo(line, { scale: .8, opacity: 0 }, {
+      scale: 1, opacity: Math.max(.12, .48 - index * .07), ease: "none",
+      scrollTrigger: { trigger: signalBridge, start: "top 90%", end: "center center", scrub: .8 }
+    });
+  });
+}
 
-  gsap.fromTo(signalBridge.querySelector(".bridge-word-b"),
-    {x:35,opacity:0},
-    {x:0,opacity:.34,duration:1,delay:.08,ease:"power3.out",
-      scrollTrigger:{trigger:signalBridge,start:"top 72%",once:true}}
-  );
+/* ---------- Final CTA ---------- */
+const finalCta = document.querySelector(".final-cta");
+if (finalCta) {
+  const reveals = finalCta.querySelectorAll(".reveal");
+  if (!reduceMotion && reveals.length) {
+    gsap.fromTo(reveals, { y: 28, opacity: 0 }, {
+      y: 0, opacity: 1, duration: .8, stagger: .08, ease: "power3.out",
+      scrollTrigger: { trigger: finalCta, start: "top 76%", once: true }
+    });
+  }
 }
 
 /* ---------- Mobile menu ---------- */
-function openMenu(){
+function openMenu() {
   if (!mobileMenu) return;
   mobileMenu.classList.add("open");
-  mobileMenu.setAttribute("aria-hidden","false");
+  mobileMenu.setAttribute("aria-hidden", "false");
   document.body.classList.add("menu-open");
 }
-function closeMenu(){
+function closeMenu() {
   if (!mobileMenu) return;
   mobileMenu.classList.remove("open");
-  mobileMenu.setAttribute("aria-hidden","true");
+  mobileMenu.setAttribute("aria-hidden", "true");
   document.body.classList.remove("menu-open");
 }
-menuButton?.addEventListener("click",openMenu);
-menuClose?.addEventListener("click",closeMenu);
-menuLinks.forEach(link=>link.addEventListener("click",closeMenu));
-document.addEventListener("keydown",event=>{
-  if(event.key==="Escape") closeMenu();
+menuButton?.addEventListener("click", openMenu);
+menuClose?.addEventListener("click", closeMenu);
+menuLinks.forEach(link => link.addEventListener("click", closeMenu));
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeMenu();
 });
 
 /* ---------- Magnetic buttons ---------- */
 if (!isMobile && !reduceMotion) {
-  document.querySelectorAll(".magnetic,.nav-cta").forEach(el=>{
-    el.addEventListener("pointermove",event=>{
-      const rect=el.getBoundingClientRect();
-      const x=event.clientX-(rect.left+rect.width/2);
-      const y=event.clientY-(rect.top+rect.height/2);
-      gsap.to(el,{x:x*.16,y:y*.16,duration:.45,ease:"power3.out"});
+  document.querySelectorAll(".magnetic,.nav-cta").forEach(el => {
+    el.addEventListener("pointermove", event => {
+      const rect = el.getBoundingClientRect();
+      const x = event.clientX - (rect.left + rect.width / 2);
+      const y = event.clientY - (rect.top + rect.height / 2);
+      gsap.to(el, { x: x * .12, y: y * .12, duration: .35, ease: "power3.out", overwrite: true });
     });
-    el.addEventListener("pointerleave",()=>{
-      gsap.to(el,{x:0,y:0,duration:.6,ease:"elastic.out(1,.45)"});
+    el.addEventListener("pointerleave", () => {
+      gsap.to(el, { x: 0, y: 0, duration: .45, ease: "elastic.out(1,.55)", overwrite: true });
     });
   });
 }
 
-/* ---------- Smooth anchor navigation ---------- */
-document.querySelectorAll('a[href^="#"]').forEach(link=>{
-  link.addEventListener("click",event=>{
-    const id=link.getAttribute("href");
-    if(!id || id==="#") return;
-    const target=document.querySelector(id);
-    if(!target) return;
-
+/* ---------- Anchor scrolling ---------- */
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener("click", event => {
+    const id = link.getAttribute("href");
+    const target = document.querySelector(id);
+    if (!target) return;
     event.preventDefault();
-    closeMenu();
-
-    if(lenis){
-      lenis.scrollTo(target,{offset:-12,duration:1.2});
-    }else{
-      target.scrollIntoView({behavior:reduceMotion?"auto":"smooth"});
-    }
-
-    history.replaceState(null,"",id);
+    if (lenis) lenis.scrollTo(target, { offset: -18, duration: 1.05 });
+    else target.scrollIntoView({ behavior: "smooth" });
   });
 });
-
-window.addEventListener("resize",()=>ScrollTrigger.refresh());
